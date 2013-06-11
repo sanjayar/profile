@@ -1,20 +1,166 @@
-## include user/hostname in title
+#!/usr/bin/env bash
+### include user/hostname in title
 export LSCOLORS=GxexfxdxCxehchcdcegcgd
 export LS_COLORS="di=01;96"
 
 ##
 ## for xterm/iterm
+
 export PROMPT_COMMAND='echo -ne "\033]0;${USER}@${HOSTNAME}: ${PWD}\007"'
-export PS1="[\e[1;33m\u\h \e[1;31m\W>\e[m]# "
+export PS1="[\e[1;33m\u\h \e[1;31m\w>\e[m]# "
 
 ##
 ### colors are nice
 ## see http://chickenriceplatter.github.io/blog/2013/03/07/customize-your-bash-prompt/
-C1="\e[38;5;214;48;5;0m" #user
-C5="\e[38;5;205;48;5;0m" #host
-C3="\e[38;5;14;48;5;0m" #dir
-C2="\e[38;5;226;48;5;0m" #logo
-C4="\e[38;5;10;48;5;0m" #prompt
+#
+#
+#
+#
+
+
+### color 0
+# USER
+CUF=227;  CUB=130;
+
+# HOST ( PROD/TEST/DEV/LAPTOP/OTHER)
+CHFP=225; CHBP=1;
+CHFT=149; CHBT=22;
+CHFD=225; CHBD=127;
+CHFL=15;  CHBL=240;
+CHFX=0;   CHBX=3;
+
+# DIR
+CDF=87;   CDB=19;
+
+# ATTRIBUTES ( VIRTUAL_ENV )
+CAF=208;  CAB=234;
+
+# SHELL PROMPT
+CSF=10;   CSB=22;
+CSFX=219; CSBX=88;
+
+
+
+## DARKER / MUTED COLORS
+CUF=208;  CUB=237;    #USER
+
+CHFP=196; CHBP=238;   #HOST/PROD
+CHFT=27;  CHBT=238;   #HOST/TEST
+CHFD=34;  CHBD=238;   #HOST/DEV
+CHFL=255; CHBL=238;   #HOST/LOCAL
+CHFX=225; CHBX=238;   #HOST/OTHER
+
+CDF=14;   CDB=239;    #DIR
+
+CAF=220;  CAB=240;    #ATTIRBUTES
+
+CSF=34;   CSB=241;    #SHELL RESULT GOOD
+CSFX=219; CSBX=88;    #SHELL RESULT BAD
+
+
+
+
+C0="\e[0m"
+
+ARR=$(echo -e '\xE2\xAE\x80')
+
+HOST_ENV=$(hostname | cut -d . -f 3)
+case $HOST_ENV in
+  dev ) CHF=$CHFD; CHB=$CHBD;;
+  test* ) CHF=$CHBT; CHB=$CHBT;;
+  prod ) CHF=$CHFP; CHB=$CHBP;;
+  * ) CHF=$CHFX; CHB=$CHBX;;
+esac
+if [ "$(uname)" == "Darwin" ]; then
+        CHF=$CHFL; CHB=$CHBL;
+fi
+
+
+
+_pl_add() { 
+        local FG=$1; local BG=$2; local TXT=$3
+        if [ ! -z $_PL_B ]; then
+                _PL_PS1="${_PL_PS1}$(cc $_PL_B $BG)${ARR}"
+        fi
+        _PL_PS1="${_PL_PS1}$(cc $FG $BG)${TXT}"
+        _PL_F=$FG
+        _PL_B=$BG
+}
+_pl_nl() {
+        local FG=0
+        local BG=0
+        if [ ! -z $_PL_B ]; then
+                _PL_PS1="${_PL_PS1}$(cc $_PL_B $BG)${ARR}"
+        fi
+        _PL_PS1="$_PL_PS1\n"
+        _PL_F=
+        _PL_B=
+}
+_pl_end() {  
+        local BG=0
+        if [ ! -z $_PL_B ]; then
+                _PL_PS1="${_PL_PS1}$(cc $_PL_B $BG)${ARR}"
+        fi
+        _PL_PS1="$_PL_PS1$C0"
+}
+
+_pl_prompt() {
+        RETVAL=$?
+
+        _PL_F=
+        _PL_B=
+        _PL_PS1=
+
+        ## if xterm-256color
+        PL_XTERM="$(echo -ne '\033]0;${USER}@${HOSTNAME}: ${PWD}\007')"
+        _PL_PS1=$PL_XTERM
+
+        _pl_add $CUF $CUB " \u "
+
+        _pl_add $CHF $CHB " \H "
+
+        _pl_add $CDF $CDB " \w "
+
+        if [ ! -z $VIRTUAL_ENV ]; then
+        _pl_add $CAF $CAB " $(basename $VIRTUAL_ENV) "
+        fi
+        _pl_nl
+        
+        if [ $RETVAL -eq 0 ]; then
+        _pl_add $CSF $CSB "\$ "
+        else
+        _pl_add $CSFX $CSBX "\$ "
+        fi
+
+        _pl_end
+
+        export PS1=$_PL_PS1
+}
+
+cc () { echo -ne "\e[38;5;$1;48;5;$2m"; }
+C1=$(cc 227 130) #USER
+C15=$(cc 130 $CHB)
+C5=$(cc $CHF $CHB) #HOST
+C53=$(cc $CHB $CDB)
+C3=$(cc $CDF $CDB) #DIR
+C30=$(cc $CDB 0)
+C2=$(cc 226 0) # SEP
+C4=$(cc 10 22)
+C40=$(cc 22 0)
+#C1="\e[38;5;220;48;5;166m" #user
+#CA15="\e[38;5;166;48;5;129m" #arrow 1-5
+#C5="\e[38;5;213;48;5;129m" #host
+#CA53="\e[38;5;129;48;5;33m" #arrow 1-5
+#C3="\e[38;5;87;48;5;33m" #dir
+#CA30="\e[38;5;39;48;5;0m"
+#C2="\e[38;5;226;48;5;0m" #logo
+#C4="\e[38;5;10;48;5;22m" #prompt
+#CA40="\e[38;5;22;48;5;0m"
+ARR=$(echo -e '\xE2\xAE\x80')
+#A15="${CA15}$(echo -e '\xe2\xae\x80')"
+#A53="${CA53}$(echo -e '\xe2\xae\x80')"
+#A30="${CA30}$(echo -e '\xe2\xae\x80')"
+#A40="${CA40}$(echo -e '\xe2\xae\x80')"
 C0="\e[00m"
 case $(uname) in 
 Linux ) 
@@ -26,6 +172,11 @@ Darwin )
        alias ls='ls -alG';
        ;;
 esac
-export PS1="${C1}\u${C2} ${SEP} ${C5}\H${C0} ${SEP} ${C3}\W${C0}\n${C4}\$ ${C0}"
+#export PS1="${C3}\w${C2} ${SEP} ${C4}\u${C0} ${SEP} ${C5}\H${C0}\n${C4}\$ ${C0}"
+#export PS1="${C1}\u${C2} ${SEP} ${C5}\H${C0} ${SEP} ${C3}\w${C0}\n${C4}\$ ${C0}"
+#export PS1="${C1}\u${A15}${C5}\H${A53}${C3}\w${A30}${C0}\n${C4}\$${A40}${C0}"
+#export PS1="$C1 \u $C15$ARR$C5 \H $C53$ARR$C3 \w $C30$ARR$C0\n$C4 \$$C40$ARR$C0 "
 export CLICOLOR=1
 export GREP_OPTIONS="--color=auto"
+
+export PROMPT_COMMAND=_pl_prompt
