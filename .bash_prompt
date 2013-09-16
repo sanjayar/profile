@@ -128,8 +128,10 @@ _pl_prompt() {
 
         _pl_add $CUF $CUB " \u "
 
+	_PSHELL="$"
 	if [[ -f ~/.machtoken ]]; then
         _pl_add $CHF $CHB " $(<~/.machtoken) \H $(<~/.machtoken)"
+	_PSHELL="$(<~/.machtoken)$"
 	else
         _pl_add $CHF $CHB " \H "
 	fi
@@ -193,9 +195,9 @@ _pl_prompt() {
         _pl_nl
         
         if [ $RETVAL -eq 0 ]; then
-        _pl_add $CSF $CSB "$ "
+        _pl_add $CSF $CSB "$_PSHELL "
         else
-        _pl_add $CSFX $CSBX "$ "
+        _pl_add $CSFX $CSBX "$_PSHELL "
         fi
 
         _pl_end
