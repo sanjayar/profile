@@ -144,7 +144,7 @@ _pl_prompt() {
 
         _pl_add $CDF $CDB " \w "
 
-        DISKUSE=$(df -h $PWD -l -P | sed -ne 's/.* \([0-9][0-9]*\)%.*/\1/p')
+        DISKUSE=$(df -h -l -P $PWD | sed -ne 's/.* \([0-9][0-9]*\)%.*/\1/p')
         if [ $DISKUSE -gt 95 ]; then
         _pl_add $CCRITF $CCRITB " disk@${DISKUSE}% "
         elif [ $DISKUSE -gt 80 ]; then
