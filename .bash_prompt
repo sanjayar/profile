@@ -128,7 +128,12 @@ _pl_prompt() {
 
         _pl_add $CUF $CUB " \u "
 
+	if [[ -f ~/.machtoken ]]; then
+        _pl_add $CHF $CHB " $(<~/.machtoken) \H $(<~/.machtoken)"
+	else
         _pl_add $CHF $CHB " \H "
+	fi
+
 
         _pl_add $CDF $CDB " \w "
 
